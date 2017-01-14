@@ -1,0 +1,8 @@
+{
+    "discordtoken":"your discord bot token",
+    "cleverbotname":"cleverbot.io username",
+    "cleverbotpassword":"cleverbot.io password",
+    "ibsearchtoken":"ibsearch key",
+    "giphytoken":"giphy key",
+    "leaguetoken":"champions.gg key"
+}
