@@ -85,7 +85,7 @@ client.on('message', msg => {
     msg.channel.sendCode('Markdown',
                          '// fun commands\n' +
                          '_annoy everyone:\n' + '#HA HA HA okay\n' +
-                         '_gif [tag or keyword]:\n' + '#I will send a gif from giphy\n' +
+                         '_gif [tag or keywords]:\n' + '#I will send a gif from giphy\n' +
                          '_hImage [tag or keywords]:\n' + '#I will send a hentai image\n' +
                          '_my avatar:\n' + '#I will show your avatar\n' +
                          '_ping:\n' + '#I will let you know how laggy I am\n' +
@@ -115,7 +115,7 @@ client.on('message', msg => {
     msg.reply('this is my ping; not yours:  ' + client.ping);
   }
   if (msg.content === '_annoy everyone') {
-    msg.channel.sendMessage('ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็\nด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็\nด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็\nด้้้้้็็็็็้้้้้็');
+    msg.channel.sendMessage('ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็\nด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็\nด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็\nด้้้้้็็็็็้้้้้็\nด้้้้้็็็็็้้้้้็\nด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็\nด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็\nด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็\n');
   }
   //random replies using local array
   if (msg.content === '_say something') {
@@ -259,7 +259,12 @@ client.on('message', msg => {
       });
       res.on("end", function () {
         var json = JSON.parse(chunks);
-        msg.reply("https://ibsearch.xxx/images/" + json[randomIntInc(0,9)].id.toString());
+        if (json.length == 0) {
+          msg.reply("No picture found");
+        }
+        else {
+          msg.reply("https://ibsearch.xxx/images/" + json[randomIntInc(0,json.length)].id.toString());
+        }
       });
     });
     req.end();
