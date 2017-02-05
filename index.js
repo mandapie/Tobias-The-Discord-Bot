@@ -15,6 +15,8 @@ var http = require("http");
 var iJson = require("./leagueitem.json");
 //ytdl API
 const yt = require('ytdl-core');
+//booru image boards
+const booru = require('booru');
 
 //the ready event is vital, it means that your bot will only start reacting to information from Discord _after_ ready is emitted
 client.on('ready', () => {
@@ -54,6 +56,15 @@ function urlSearch(str) {
   }
   return newArr.trim();
 }
+//remove first element and convert to array of strings
+function stringToArr(str) {
+  var arr = str.split(" ");
+  var retArr = [];
+  for(i = 1; i < arr.length; i++){
+    retArr.push(arr[i]);
+  }
+  return retArr;
+}
 
 /********** local things **********/
 var replyArr = [];
@@ -80,15 +91,15 @@ client.on('message', msg => {
                          '_join:\n' + '#I will join the voice channel that you\'re in\n' +
                          '_leave:\n' + '#I will leave the channel that you\'re in\n');
     msg.channel.sendCode('Markdown',
-                          '//League of Legends builds\n' +
+                          '// League of Legends builds\n' +
                           '_items [champion name]:\n' + '#I will print out the most popluar items used on a champion\n');
     msg.channel.sendCode('Markdown',
                          '// fun commands\n' +
                          '_annoy everyone:\n' + '#HA HA HA okay\n' +
-                         '_gif [tag or keywords]:\n' + '#I will send a gif from giphy\n' +
-                         '_hImage [tag or keywords]:\n' + '#I will send a hentai image\n' +
+                         '_gif [tag(s) or keyword(s)]:\n' + '#I will send a gif from giphy\n' +
                          '_my avatar:\n' + '#I will show your avatar\n' +
                          '_ping:\n' + '#I will let you know how laggy I am\n' +
+                         '_r34 [tag(s) or keyword(s)]' + '#I will post something from rule 34\n' +
                          '_say something:\n' + '#I will say something random\n' +
                          'Tobias, [your message]:\n' + '#I reply you better(maybe)\n' +
                          '_wai or _why:\n' + '#I will reply with love <3\n');
@@ -166,12 +177,13 @@ client.on('message', msg => {
   if (msg.content.startsWith('_play')) {
     const voiceChannel = msg.member.voiceChannel;
     song = takeFstElem(msg.content);
-    if (!voiceChannel) {
+    if (!voiceChannel || voiceChannel.type !== 'voice') {
       return msg.reply(`Please be in a voice channel first!`);
     }
     voiceChannel.join().then(connnection => {
       let stream = yt(song, {audioonly: true});
       const dispatcher = connnection.playStream(stream);
+      console.log(dispatcher);
       let collector = msg.channel.createCollector(msg => msg);
       collector.on('message', msg => {
         if (msg.content === '_pause') {
@@ -237,37 +249,29 @@ client.on('message', msg => {
     req.end();
   }
 });
-/***** ibsearch.xxx *****/ //for ecchi images
+/***** rule 34 *****/ //for ecchi images and others
+//npm install booru --save
 client.on('message', msg => {
-  if (msg.content.startsWith('_hImage')) {
-    var query = urlSearch(msg.content);
-    var options = {
-      "method": "GET",
-      "hostname": "ibsearch.xxx",
-      "port": null,
-      "path": "/api/v1/images.json?q=" + query + "&key=" + keysJson.ibsearchtoken + "&limit=10",
-      "headers": {
-        "cache-control": "no-cache",
-        "postman-token": "02eb707c-64e8-e982-b5d5-06c2c5f5f84e"
+  if (msg.content.startsWith('_r34')) {
+    var tags = [];
+    tags = stringToArr(msg.content);
+    booru.search("r34", tags, 100)
+    .then(booru.commonfy)
+    .then(images => {
+      //Log the direct link to each image 
+      msg.reply(images[randomIntInc(0,images.length)].common.file_url);
+    })
+    .catch(err => {
+      if (err.name === 'booruError') {
+        //It's a custom error thrown by the package 
+        msg.reply("no image found");
+        console.log(err.message)
+      } else {
+        //This means I messed up. Whoops. 
+        msg.reply("no image found");
+        console.log(err)
       }
-    };
-    var req = https.request(options, function (res) {
-      var chunks = [];
-      var json;
-      res.on("data", function (chunk) {
-          chunks += chunk.toString();
-      });
-      res.on("end", function () {
-        var json = JSON.parse(chunks);
-        if (json.length == 0) {
-          msg.reply("No picture found");
-        }
-        else {
-          msg.reply("https://ibsearch.xxx/images/" + json[randomIntInc(0,json.length)].id.toString());
-        }
-      });
-    });
-    req.end();
+    })
   }
 });
 /***** League of legends champion build guides *****/
