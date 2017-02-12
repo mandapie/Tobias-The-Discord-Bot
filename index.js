@@ -97,9 +97,11 @@ client.on('message', msg => {
                          '// fun commands\n' +
                          '_annoy everyone:\n' + '#HA HA HA okay\n' +
                          '_gif [tag(s) or keyword(s)]:\n' + '#I will send a gif from giphy\n' +
+                         '_hImage [tag or keywords]:\n' + '#I will send a hentai image\n' +
                          '_my avatar:\n' + '#I will show your avatar\n' +
                          '_ping:\n' + '#I will let you know how laggy I am\n' +
-                         '_r34 [tag(s) or keyword(s)]' + '#I will post something from rule 34\n' +
+                         '_r34 [tag(s) or keyword(s)] (use underscore as spaces for multiword tags)\n' +
+                         'eg: _r34 miss_fortune\n' + '#I will post something from rule 34\n' +
                          '_say something:\n' + '#I will say something random\n' +
                          'Tobias, [your message]:\n' + '#I reply you better(maybe)\n' +
                          '_wai or _why:\n' + '#I will reply with love <3\n');
@@ -183,7 +185,6 @@ client.on('message', msg => {
     voiceChannel.join().then(connnection => {
       let stream = yt(song, {audioonly: true});
       const dispatcher = connnection.playStream(stream);
-      console.log(dispatcher);
       let collector = msg.channel.createCollector(msg => msg);
       collector.on('message', msg => {
         if (msg.content === '_pause') {
@@ -199,6 +200,7 @@ client.on('message', msg => {
       dispatcher.on('end', () => {
         voiceChannel.leave();
       });
+      dispatcher.on('error', console.error);
     });
   }
 });
@@ -272,6 +274,34 @@ client.on('message', msg => {
         console.log(err)
       }
     })
+  }
+});
+/***** ibsearch.xxx *****/ //for more ecchi images
+client.on('message', msg => {
+  if (msg.content.startsWith('_hImage')) {
+    var query = urlSearch(msg.content);
+    var options = {
+      "method": "GET",
+      "hostname": "ibsearch.xxx",
+      "port": null,
+      "path": "/api/v1/images.json?q=" + query + "&key=" + keysJson.ibsearchtoken + "&limit=100",
+      "headers": {
+        "cache-control": "no-cache",
+        "postman-token": "02eb707c-64e8-e982-b5d5-06c2c5f5f84e"
+      }
+    };
+    var req = https.request(options, function (res) {
+      var chunks = [];
+      var json;
+      res.on("data", function (chunk) {
+          chunks += chunk.toString();
+      });
+      res.on("end", function () {
+        var json = JSON.parse(chunks);
+        msg.reply("https://ibsearch.xxx/images/" + json[randomIntInc(0,9)].id.toString());
+      });
+    });
+    req.end();
   }
 });
 /***** League of legends champion build guides *****/
